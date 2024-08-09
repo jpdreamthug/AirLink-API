@@ -1,5 +1,6 @@
 from django.db.models import F, Count, Value
 from django.db.models.functions import Concat
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 
@@ -70,6 +71,8 @@ class RouteViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
 
 
 class FlightViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["departure_time", "arrival_time"]
     serializer_class = FlightSerializer
     action_serializers = {
         "list": FlightListSerializer,
