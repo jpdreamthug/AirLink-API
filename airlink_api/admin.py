@@ -8,8 +8,9 @@ from airlink_api.models import (
     Route,
     Flight,
     Order,
-    Ticket
+    Ticket,
 )
+
 admin.site.register(AirplaneType)
 admin.site.register(Airplane)
 admin.site.register(Airport)

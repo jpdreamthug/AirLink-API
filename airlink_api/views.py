@@ -1,4 +1,7 @@
+from django.db.models import F, Count, Value
+from django.db.models.functions import Concat
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 
 from airlink_api.mixins import GenericMethodsMixin
 from airlink_api.models import (
@@ -9,7 +12,6 @@ from airlink_api.models import (
     Route,
     Flight,
     Order,
-    Ticket,
 )
 from airlink_api.serializers import (
     AirplaneTypeSerializer,
@@ -19,8 +21,19 @@ from airlink_api.serializers import (
     RouteSerializer,
     FlightSerializer,
     OrderSerializer,
-    TicketSerializer, AirplaneListSerializer, AirplaneDetailSerializer,
+    AirplaneListSerializer,
+    AirplaneDetailSerializer,
+    FlightListSerializer,
+    FlightDetailSerializer,
+    RouteListSerializer,
+    RouteDetailSerializer,
+    OrderDetailSerializer,
 )
+
+
+class BasePagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 100
 
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
@@ -33,7 +46,7 @@ class AirplaneViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
     serializer_class = AirplaneSerializer
     action_serializers = {
         "list": AirplaneListSerializer,
-        "retrieve": AirplaneDetailSerializer
+        "retrieve": AirplaneDetailSerializer,
     }
 
 
@@ -47,21 +60,61 @@ class CrewViewSet(viewsets.ModelViewSet):
     serializer_class = CrewSerializer
 
 
-class RouteViewSet(viewsets.ModelViewSet):
-    queryset = Route.objects.all()
+class RouteViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
+    queryset = Route.objects.select_related("source", "destination")
     serializer_class = RouteSerializer
+    action_serializers = {
+        "list": RouteListSerializer,
+        "retrieve": RouteDetailSerializer,
+    }
 
 
-class FlightViewSet(viewsets.ModelViewSet):
-    queryset = Flight.objects.all()
+class FlightViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
     serializer_class = FlightSerializer
+    action_serializers = {
+        "list": FlightListSerializer,
+        "retrieve": FlightDetailSerializer,
+    }
+
+    def get_queryset(self):
+        queryset = Flight.objects.select_related(
+            "airplane__airplane_type",
+            "route__source",
+            "route__destination",
+        ).prefetch_related(
+            "crew",
+        ).annotate(
+            tickets_available=(
+                    F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
+            ),
+            custom_route=Concat(
+                F("route__source__name"),
+                Value(" - "),
+                F("route__destination__name"),
+            ),
+        )
+        return queryset
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+class OrderViewSet(GenericMethodsMixin, viewsets.ModelViewSet):
+    queryset = Order.objects.prefetch_related("tickets")
+    pagination_class = BasePagination
     serializer_class = OrderSerializer
+    action_serializers = {
+        "retrieve": OrderDetailSerializer,
+    }
 
+    def get_queryset(self):
+        queryset = self.queryset
 
-class TicketViewSet(viewsets.ModelViewSet):
-    queryset = Ticket.objects.all()
-    serializer_class = TicketSerializer
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user=self.request.user)
+
+        user_id = self.request.query_params.get("user", None)
+        if user_id:
+            queryset = queryset.filter(user__id=user_id)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
