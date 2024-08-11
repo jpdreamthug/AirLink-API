@@ -20,6 +20,4 @@ class Command(BaseCommand):
                     f"Database not ready, retrying {i + 1}/{max_retries}..."
                 )
                 time.sleep(2)
-        self.stdout.write(self.style.ERROR(
-            "Database not ready after maximum retries."
-        ))
+        self.stdout.write(self.style.ERROR("Database not ready after maximum retries."))

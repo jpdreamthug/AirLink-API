@@ -12,13 +12,13 @@ from airlink_api.views import (
 )
 
 router = DefaultRouter()
-router.register(r"airplane-types", AirplaneTypeViewSet, basename="airplane-types")
-router.register(r"airplanes", AirplaneViewSet, basename="airplanes")
-router.register(r"airports", AirportViewSet, basename="airports")
+router.register(r"airplane-types", AirplaneTypeViewSet, basename="airplane-type")
+router.register(r"airplanes", AirplaneViewSet, basename="airplane")
+router.register(r"airports", AirportViewSet, basename="airport")
 router.register(r"crew", CrewViewSet, basename="crew")
-router.register(r"routes", RouteViewSet, basename="routes")
-router.register(r"flights", FlightViewSet, basename="flights")
-router.register(r"orders", OrderViewSet, basename="orders")
+router.register(r"routes", RouteViewSet, basename="route")
+router.register(r"flights", FlightViewSet, basename="flight")
+router.register(r"orders", OrderViewSet, basename="order")
 
 urlpatterns = [path("", include(router.urls))]
 

@@ -12,7 +12,6 @@ services:
              python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/usr/src/app
-      - my_media:/files/media
     ports:
       - 8001:8000
     depends_on:
@@ -31,4 +30,3 @@ services:
 
 volumes:
   pgdbdata: null
-  my_media: null
