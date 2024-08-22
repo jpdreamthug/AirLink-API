@@ -1,14 +1,15 @@
+import uuid
 from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from airlink_api.models import Airplane, Route, Flight, Crew, AirplaneType, Airport
 from airlink_api.serializers import FlightListSerializer, FlightDetailSerializer
-import uuid
 
 FLIGHT_URL = reverse("airlink_api:flight-list")
 
@@ -123,7 +124,7 @@ class AuthenticatedFlightApiTests(TestCase):
         flight2 = sample_flight(airplane=airplane2)
         flight3 = sample_flight()
 
-        res = self.client.get(FLIGHT_URL, {"id": f"{airplane1.id}"})
+        res = self.client.get(FLIGHT_URL, {"id": f"{flight1.id}"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data["results"]), 1)
