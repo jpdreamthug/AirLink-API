@@ -86,14 +86,6 @@ class Flight(models.Model):
 
     @staticmethod
     def validate_time(arrival_time, departure_time):
-        if not departure_time:
-            raise ValidationError(
-                {"departure_time": "Departure time must be specified."}
-            )
-
-        if not arrival_time:
-            raise ValidationError({"arrival_time": "Arrival time must be specified."})
-
         if arrival_time <= departure_time:
             raise ValidationError(
                 {"arrival_time": "Arrival time must be later than departure time."}
