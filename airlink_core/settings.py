@@ -36,10 +36,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "debug_toolbar",
-    "airlink_api",
-    "user",
     "django_filters",
     "drf_spectacular",
+    "airlink_api",
+    "user",
 ]
 
 MIDDLEWARE = [
